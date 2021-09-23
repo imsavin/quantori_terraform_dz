@@ -9,38 +9,32 @@ resource "aws_security_group" "web" {
         from_port   = -1
         to_port     = -1
         protocol    = "icmp"
-        cidr_blocks = ["${var.vpc_1_cidr}", ]
+        cidr_blocks = ["${var.vpc_1_cidr}","${var.vpc_2_cidr}"]
     }
     ingress { # SSH
         from_port   = 22
         to_port     = 22
         protocol    = "tcp"
-        cidr_blocks = ["${var.vpc_cidr}"]
+        cidr_blocks = ["${var.vpc_1_cidr}","${var.vpc_2_cidr}"]
     }
     ingress { # HTTP
-        from_port   = 80
-        to_port     = 80
+        from_port   = 8888
+        to_port     = 8888
         protocol    = "tcp"
-        cidr_blocks = ["${var.vpc_cidr}"]
-    }
-    ingress { # HTTPS
-        from_port   = 443
-        to_port     = 443
-        protocol    = "tcp"
-        cidr_blocks = ["${var.vpc_cidr}"]
+        cidr_blocks = ["${var.vpc_1_cidr}","${var.vpc_2_cidr}"]
     }
     ingress { # Private subnet
         from_port   = 0
         to_port     = 0
         protocol    = "-1"
-        cidr_blocks = ["${var.vpc_cidr_private}"]
+        cidr_blocks = ["${var.vpc_1_cidr_private}","${var.vpc_2_cidr_private}"]
     }
 
     egress {
         from_port   = -1
         to_port     = -1
         protocol    = "icmp"
-        cidr_blocks = ["${var.vpc_cidr}"]
+        cidr_blocks = ["${var.vpc_1_cidr}","${var.vpc_2_cidr}"]
     }
     egress { ## SSH/GIT
         from_port   = 22
@@ -49,18 +43,12 @@ resource "aws_security_group" "web" {
         cidr_blocks = ["0.0.0.0/0"]
     }
     egress { ## HTTP
-        from_port   = 80
-        to_port     = 80
+        from_port   = 8888
+        to_port     = 8888
         protocol    = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
-    egress { ## HTTPS
-        from_port   = 443
-        to_port     = 443
-        protocol    = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-    egress { ## DNS
+     egress { ## DNS
         from_port   = 53
         to_port     = 53
         protocol    = "udp"
@@ -70,11 +58,11 @@ resource "aws_security_group" "web" {
         from_port   = 0
         to_port     = 0
         protocol    = "-1"
-        cidr_blocks = ["${var.vpc_cidr_private}"]
+        cidr_blocks = ["${var.vpc_1_cidr_private}","${var.vpc_2_cidr_private}"]
     }
 
 
-    vpc_id = "${aws_vpc.MyVPC.id}"
+    vpc_id = "${aws_vpc.IS_VPC1.id}"
 
     tags {
         Name        = "Nginx",
@@ -101,22 +89,41 @@ data "aws_ami" "web_ami" {
   owners     = ["${data.aws_caller_identity.current.account_id}"]
 }
 
-resource "aws_instance" "web" {
-    ami                         = "${data.aws_ami.web_ami.image_id}"
+resource "aws_instance" "web-1" {
+#    ami                         = "${data.aws_ami.web_ami.image_id}"
+    ami                         = "ami-0d382e80be7ffdae5"
     availability_zone           = "${var.private_az}"
     instance_type               = "t2.micro"
-    count                       = "2"
+#    count                       = "2"
     key_name                    = "${var.aws_key_name}"
     vpc_security_group_ids      = ["${aws_security_group.web.id}"]
-    subnet_id                   = "${aws_subnet.aws-subnet-private.id}"
+    subnet_id                   = "${aws_subnet.aws-1-subnet-private.id}"
     source_dest_check           = false
     associate_public_ip_address = false
     monitoring                  = true
-    root_block_device = {
-      volume_size               = "10"
-      volume_type               = "gp2"
+    user_data = "${file("scripts/nginx_add.sh")}"
+    lifecycle {
+      create_before_destroy = true
     }
+    tags {
+        Name        = "Nginx",
+        Description = "Backend server"
+    }
+}
 
+resource "aws_instance" "web-2" {
+#    ami                         = "${data.aws_ami.web_ami.image_id}"
+    ami                         = "ami-0d382e80be7ffdae5"
+    availability_zone           = "${var.private_az}"
+    instance_type               = "t2.micro"
+#    count                       = "2"
+    key_name                    = "${var.aws_key_name}"
+    vpc_security_group_ids      = ["${aws_security_group.web.id}"]
+    subnet_id                   = "${aws_subnet.aws-2-subnet-private.id}"
+    source_dest_check           = false
+    associate_public_ip_address = false
+    monitoring                  = true
+    user_data = "${file("scripts/nginx_add.sh")}"
     lifecycle {
       create_before_destroy = true
     }
@@ -127,5 +134,5 @@ resource "aws_instance" "web" {
 }
 
 output "web_ips" {
-  value = ["${aws_instance.web.*.private_ip}"]
+  value = ["${aws_instance.web-1.*.private_ip}", "${aws_instance.web-2.*.private_ip}"]
 }
