@@ -26,13 +26,13 @@ resource "aws_security_group" "ssh_proxy" {
 
     vpc_id = "${aws_vpc.IS_VPC1.id}"
 
-    tags {
-        Name        = "SshProxy",
+    tags = {
+        Name        = "SshProxy"
         Description = "Security group for SSH proxy to VPC"
     }
 }
 
-data "aws_ami" "ssh_proxy_ami" {
+/* data "aws_ami" "ssh_proxy_ami" {
   most_recent = true
 
   filter {
@@ -50,19 +50,22 @@ data "aws_ami" "ssh_proxy_ami" {
   name_regex = "ssh-proxy_.*"
   owners     = ["${data.aws_caller_identity.current.account_id}"]
 }
-
+ */
 resource "aws_instance" "ssh_proxy" {
 #    ami = "${data.aws_ami.ssh_proxy_ami.image_id}"
-    ami = "ami-011996ff98de391d1"
-    availability_zone = "${var.public_az}"
+    ami = "ami-087c17d1fe0178315"
+    availability_zone = "us-east-1a"
     instance_type = "t2.micro"
-    key_name = "${var.aws_key_name}"
+    key_name = "savincloud"
     vpc_security_group_ids = ["${aws_security_group.ssh_proxy.id}"]
     associate_public_ip_address = true
     subnet_id = "${aws_subnet.aws-1-subnet-public.id}"
     user_data = "${file("scripts/ssh_add.sh")}"
-    tags {
-        Name        = "SSH-Proxy",
+    root_block_device {
+      volume_size = 10
+    }
+    tags = {
+        Name        = "SSH-Proxy"
         Description = "SSH Proxy to VPCs"
     }
 }

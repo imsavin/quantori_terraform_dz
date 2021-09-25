@@ -17,7 +17,7 @@ resource "aws_route" "internet_access-2" {
 resource "aws_route_table" "private_route_table-1" {
     vpc_id   = "${aws_vpc.IS_VPC1.id}"
 
-    tags {
+    tags = {
         Name = "Private route table"
     }
 }
@@ -25,7 +25,7 @@ resource "aws_route_table" "private_route_table-1" {
 resource "aws_route_table" "private_route_table-2" {
     vpc_id   = "${aws_vpc.IS_VPC2.id}"
 
-    tags {
+    tags = {
         Name = "Private route table"
     }
 }
@@ -34,18 +34,20 @@ resource "aws_route_table" "private_route_table-2" {
 resource "aws_route" "private_route-1" {
     route_table_id  = "${aws_route_table.private_route_table-1.id}"
     destination_cidr_block = "0.0.0.0/0"
+    vpc_peering_connection_id = aws_vpc_peering_connection.VPCPeer.id
 #    nat_gateway_id = "${aws_nat_gateway.gateway.id}"
 }
 
 resource "aws_route" "private_route-2" {
     route_table_id  = "${aws_route_table.private_route_table-2.id}"
+    vpc_peering_connection_id = aws_vpc_peering_connection.VPCPeer.id
     destination_cidr_block = "0.0.0.0/0"
 #    nat_gateway_id = "${aws_nat_gateway.gateway.id}"
 }
 
 resource "aws_route_table" "public-1" {
   vpc_id = "${aws_vpc.IS_VPC1.id}"
-  tags {
+  tags = {
       Name = "Public route table 1"
   }
   route {
@@ -56,7 +58,7 @@ resource "aws_route_table" "public-1" {
 
 resource "aws_route_table" "public-2" {
   vpc_id = "${aws_vpc.IS_VPC2.id}"
-  tags {
+  tags = {
       Name = "Public route table"
   }
   route {
@@ -68,22 +70,35 @@ resource "aws_route_table" "public-2" {
 
 # Associate subnet public_subnet to public route table
 resource "aws_route_table_association" "public_subnet_association-1" {
-    subnet_id = "${aws_subnet.aws-subnet-public-1.id}"
+    subnet_id = "${aws_subnet.aws-1-subnet-public.id}"
     route_table_id = "${aws_vpc.IS_VPC1.main_route_table_id}"
 }
 
 resource "aws_route_table_association" "public_subnet_association-2" {
-    subnet_id = "${aws_subnet.aws-subnet-public-2.id}"
+    subnet_id = "${aws_subnet.aws-2-subnet-public.id}"
     route_table_id = "${aws_vpc.IS_VPC2.main_route_table_id}"
 }
 
+resource "aws_route_table_association" "public_subnet_association-3" {
+    subnet_id = "${aws_subnet.aws-3-subnet-public.id}"
+    route_table_id = "${aws_vpc.IS_VPC1.main_route_table_id}"
+}
+
+
+
 # Associate subnet private_subnet to private route table
 resource "aws_route_table_association" "private_subnet_association-1" {
-    subnet_id = "${aws_subnet.aws-subnet-private-1.id}"
+    subnet_id = "${aws_subnet.aws-1-subnet-private.id}"
+    route_table_id = "${aws_route_table.private_route_table-1.id}"
+}
+
+resource "aws_route_table_association" "private_subnet_association-11" {
+    subnet_id = "${aws_subnet.aws-11-subnet-private.id}"
     route_table_id = "${aws_route_table.private_route_table-1.id}"
 }
 
 resource "aws_route_table_association" "private_subnet_association-2" {
-    subnet_id = "${aws_subnet.aws-subnet-private-2.id}"
+    subnet_id = "${aws_subnet.aws-2-subnet-private.id}"
     route_table_id = "${aws_route_table.private_route_table-2.id}"
 }
+

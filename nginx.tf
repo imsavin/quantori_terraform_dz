@@ -58,19 +58,19 @@ resource "aws_security_group" "web" {
         from_port   = 0
         to_port     = 0
         protocol    = "-1"
-        cidr_blocks = ["${var.vpc_1_cidr_private}","${var.vpc_2_cidr_private}"]
+        cidr_blocks = ["${var.vpc_1_cidr_private}","${var.vpc_2_cidr_private}","${var.vpc_11_cidr_private}"]
     }
 
 
     vpc_id = "${aws_vpc.IS_VPC1.id}"
 
-    tags {
-        Name        = "Nginx",
+    tags = {
+        Name        = "Nginx"
         Description = "Security group for backends"
     }
 }
 
-data "aws_ami" "web_ami" {
+/* data "aws_ami" "web_ami" {
   most_recent = true
 
   filter {
@@ -87,51 +87,54 @@ data "aws_ami" "web_ami" {
   }
   name_regex = "nginx_.*"
   owners     = ["${data.aws_caller_identity.current.account_id}"]
-}
+} */
 
 resource "aws_instance" "web-1" {
 #    ami                         = "${data.aws_ami.web_ami.image_id}"
-    ami                         = "ami-0d382e80be7ffdae5"
-    availability_zone           = "${var.private_az}"
+    ami                         = "ami-09151282d5abf5a89"
+    availability_zone           = "us-east-1b"
     instance_type               = "t2.micro"
-#    count                       = "2"
-    key_name                    = "${var.aws_key_name}"
+  #  count                       = "2"
+    key_name                    = "savincloud"
     vpc_security_group_ids      = ["${aws_security_group.web.id}"]
     subnet_id                   = "${aws_subnet.aws-1-subnet-private.id}"
+    #load_balancers              =  "${aws_elb.elb.id}"
     source_dest_check           = false
     associate_public_ip_address = false
     monitoring                  = true
-    user_data = "${file("scripts/nginx_add.sh")}"
+    user_data = "${file("nginx_add.sh")}"
     lifecycle {
       create_before_destroy = true
     }
-    tags {
-        Name        = "Nginx",
+    tags = {
+        Name        = "Nginx 1",
         Description = "Backend server"
     }
 }
 
 resource "aws_instance" "web-2" {
 #    ami                         = "${data.aws_ami.web_ami.image_id}"
-    ami                         = "ami-0d382e80be7ffdae5"
-    availability_zone           = "${var.private_az}"
+    ami                         = "ami-09151282d5abf5a89"
+    availability_zone           = "us-east-1a"
     instance_type               = "t2.micro"
-#    count                       = "2"
-    key_name                    = "${var.aws_key_name}"
+ #   count                       = "2"
+    key_name                    = "savincloud"
     vpc_security_group_ids      = ["${aws_security_group.web.id}"]
-    subnet_id                   = "${aws_subnet.aws-2-subnet-private.id}"
+    subnet_id                   = "${aws_subnet.aws-11-subnet-private.id}"
+    #load_balancers              =  "${aws_elb.elb.id}"
     source_dest_check           = false
     associate_public_ip_address = false
     monitoring                  = true
-    user_data = "${file("scripts/nginx_add.sh")}"
+    user_data = "${file("nginx_add.sh")}"
     lifecycle {
       create_before_destroy = true
     }
-    tags {
-        Name        = "Nginx",
+    tags = {
+        Name        = "Nginx 2",
         Description = "Backend server"
     }
 }
+
 
 output "web_ips" {
   value = ["${aws_instance.web-1.*.private_ip}", "${aws_instance.web-2.*.private_ip}"]
