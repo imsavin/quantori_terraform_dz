@@ -124,3 +124,10 @@ resource "aws_instance" "web-2" {
 output "web_ips" {
   value = ["${aws_instance.web-1.*.private_ip}", "${aws_instance.web-2.*.private_ip}"]
 }
+
+resource "aws_vpc_endpoint" "s3_endpoint" {
+  route_table_ids   = ["${aws_route_table.private_route_table-1.id}"]
+  service_name      = "com.amazonaws.us-east-1.s3"
+  vpc_endpoint_type = "Gateway"
+  vpc_id            = "${aws_vpc.IS_VPC1.id}"
+}
