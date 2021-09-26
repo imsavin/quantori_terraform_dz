@@ -60,13 +60,16 @@ resource "aws_instance" "ssh_proxy" {
     vpc_security_group_ids = ["${aws_security_group.ssh_proxy.id}"]
     associate_public_ip_address = true
     subnet_id = "${aws_subnet.aws-1-subnet-public.id}"
-    user_data = "${file("scripts/ssh_add.sh")}"
+    user_data = "${file("ssh_add.sh")}"
     root_block_device {
       volume_size = 10
     }
     tags = {
         Name        = "SSH-Proxy"
         Description = "SSH Proxy to VPCs"
+        owner = "I.M. Savin"
+        project = "devops school"
+        enviroment = "learning"
     }
 }
 
