@@ -1,27 +1,26 @@
 resource "aws_launch_configuration" "alc" {
   name_prefix = "alc-"
 
-  image_id = "ami-09151282d5abf5a89"
+  image_id      = "ami-09151282d5abf5a89"
   instance_type = "t2.micro"
-  key_name = "savincloud"
+  key_name      = "savincloud"
 
-  #security_groups = ["${aws_security_group.web.id}"]
   associate_public_ip_address = false
 
   lifecycle {
     create_before_destroy = true
   }
 
-  
+
 }
 
 resource "aws_autoscaling_group" "asg" {
   name = "${aws_launch_configuration.alc.name}-asg"
 
-  min_size             = 0
-  desired_capacity     = 0
-  max_size             = 3
-  
+  min_size         = 0
+  desired_capacity = 0
+  max_size         = 3
+
   launch_configuration = aws_launch_configuration.alc.name
 
   enabled_metrics = [
@@ -36,7 +35,6 @@ resource "aws_autoscaling_group" "asg" {
 
   vpc_zone_identifier = ["${aws_subnet.aws-2-subnet-private.id}"]
 
-  # Required to redeploy without an outage.
   lifecycle {
     create_before_destroy = true
   }
