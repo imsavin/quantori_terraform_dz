@@ -26,4 +26,4 @@ sudo chown -R work:work /home/work
 
 sudo growfs /dev/xvda 1 > /root/resizedisk.log 
 sudo xfs_growfs -d / >> root/resizedisk.log
-sudo echo -e "sudo growfs /dev/xvda 1 > /root/resizedisk.log\nsudo xfs_growfs -d / >> root/resizedisk.log" > /root/resizecommands
+sudo echo -e "1. manually chnge disk size in console or cli.\n 2. sudo growfs /dev/xvda 1 > /root/resizedisk.log\n3. sudo xfs_growfs -d / >> root/resizedisk.log" > /root/resizecommands
