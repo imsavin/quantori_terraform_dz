@@ -131,6 +131,7 @@ resource "aws_instance" "web-2" {
     associate_public_ip_address = false
     monitoring                  = true
     user_data = "${file("nginx_add.sh")}"
+    iam_instance_profile = "${aws_iam_instance_profile.s3roacess_iam.name}"
     lifecycle {
       create_before_destroy = true
     }

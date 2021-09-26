@@ -71,7 +71,7 @@ resource "aws_instance" "ssh_proxy" {
         project = "devops school"
         enviroment = "learning"
     }
-}
+  }
 
 #resource "aws_eip" "eip_proxy" {
 #  instance = "${aws_instance.ssh_proxy.id}"
