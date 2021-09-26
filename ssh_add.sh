@@ -11,7 +11,7 @@ sudo useradd -m -d /home/home -s /bin/bash -G wheel,adm home
 sudo mkdir /home/home/.ssh
 sudo echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDinnjV6O4zICVu2XzTFJpEsWp39gLkNI3kFkEbg7BissIhXPY+uH4CMGtUznltqPwpoBcomol4xHpdyRf+9yEsMbMy8V04BM0/LKdG+87F/aaHRRsOD8Lj0jlSzGMup694slxSJOnqzBHqSUV8r++zOa9p6zxR/0aWN3y+NbdtUPGCPGSRBgois2Kt9J5UzYVY0EjYrIPtSx+h/hwcE1TAVeMu2Mi3+8ntV0pVT2R1NVQdV0MruX8y16HsGx0+6pDFSaVAcLcPE9+2CbD5EKsxPk/w0u8iB71k1G2dFOBj2MhlL6GnfP3SSAaAjsHC+lWsnmltZkIG8Xt9UttUvb2d avial@darkstar' >> /home/home/.ssh/authorized_keys
 sudo chmod 600 /home/home/.ssh/authorized_keys
-1sudo chmod 700 /home/home/.ssh
+sudo chmod 700 /home/home/.ssh
 sudo echo "home ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/90-cloud-init-users
 sudo chown -R home:home /home/home
 
